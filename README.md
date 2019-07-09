@@ -31,14 +31,8 @@ fun = fn %{upstream: url} ->
   end
 end
 
-callback = fn _ -> :noop end
-
 response =
-  Failover.call(
-    %{upstream: ["https://master-url.com/api", "https://slave-url.com/api"]},
-    fun,
-    callback
-  )
+  Failover.call(%{upstream: ["https://master-url.com/api", "https://slave-url.com/api"]}, fun)
 
 case response do
   {:ok, response, updated_state, _state_error} ->
