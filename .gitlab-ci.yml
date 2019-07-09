@@ -1,0 +1,52 @@
+image: elixir:alpine
+
+variables:
+  MIX_ENV: "test"
+
+before_script:
+  - mix local.hex --force
+  - mix local.rebar --force
+  - mix deps.get --only $MIX_ENV
+
+.test_variables: &test_variables
+  MIX_ENV: "test"
+  EX_LOG_LEVEL: "debug"
+
+stages:
+  - build
+  - test
+  - post-test
+
+build:
+  stage: build
+  script:
+    - mix
+
+run-tests:
+  stage: test
+  variables:
+    <<: *test_variables
+  script:
+    - mix test
+
+code-coverage:
+  stage: post-test
+  variables:
+    <<: *test_variables
+  script:
+    - mix test --cover
+
+lint:
+  stage: post-test
+  variables:
+    <<: *test_variables
+  script:
+    - mix format --check-formatted
+
+static-analysis:
+  stage: post-test
+  variables:
+    <<: *test_variables
+  script:
+    - mix archive.install hex --force sobelow
+    - mix sobelow -i Config.HTTPS
